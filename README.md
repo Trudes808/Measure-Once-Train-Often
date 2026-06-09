@@ -70,12 +70,8 @@ cd Measure-Once-Train-Often
 
 
 # Datasets
-The datasets can be downloaded from [here](add_link).
-
-```
-cd t-prime-ext/
-git clone https://llcad-github.llan.ll.mit.edu/chuns/DATASETS.git
-```
+The datasets can be downloaded from [here]([add_link](https://archive.ll.mit.edu/r-d/)).
+In the main zip there is a README description.
 
 ### Simulated data
 The synthetic datasets are organized as follows in the downloaded repository:
