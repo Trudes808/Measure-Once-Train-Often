@@ -70,7 +70,7 @@ cd Measure-Once-Train-Often
 
 
 # Datasets
-The datasets can be downloaded from [here]([add_link](https://archive.ll.mit.edu/r-d/)).
+The datasets can be downloaded from [here]([https://archive.ll.mit.edu/r-d/]).
 In the main zip there is a README description.
 
 ### Simulated data
