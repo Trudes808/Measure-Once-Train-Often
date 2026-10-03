@@ -16,7 +16,9 @@ S. Trudeau, S. Chun, B. Nguyen, and K. Chowdhury, “Measure Once, Train Often: 
 
 # T-PRIME Extension
 
-This repository extends the original [T-PRIME](https://github.com/genesys-neu/t-prime-ext) project by adding CMAT-based channel augmentation and additional features for improved real-world RF signal classification.
+This repository extends the original [T-PRIME](https://github.com/genesys-neu/t-prime) project by adding CMAT-based channel augmentation and additional features for improved real-world RF signal classification.
+
+A ready-to-use T-PRIME with CMAT already integrated is available on the [`hcro` branch of T-PRIME](https://github.com/genesys-neu/t-prime/tree/hcro).
 
 ---
 
@@ -24,11 +26,16 @@ This repository extends the original [T-PRIME](https://github.com/genesys-neu/t-
 
 Before getting started, make sure you have the required dependencies installed.  
 
-1. Clone the T-PRIME repository:
+1. Clone the T-PRIME repository and check out the `hcro` branch:
 ```bash
-git clone https://github.com/genesys-neu/t-prime-ext.git
-cd t-prime-ext/
+git clone https://github.com/genesys-neu/t-prime.git
+cd t-prime/
+git checkout hcro
 ```
+The `hcro` branch already contains the CMAT-modified files listed in step 4, so no copying is needed. It also includes:
+- the fix for the channel-augmentation frequency-shift bug (see [Bug fix: CMAT channel application](#bug-fix-cmat-channel-application));
+- extra training options in `TPrime_transformer_train.py`: `--loader_workers` (multi-process data loading), `--patience`/`--min_delta` (early stopping), `--awgn_snr_min`/`--awgn_snr_max` (AWGN training range for `--sota_type=awgn`), and additional protocol names;
+- `cmat_hcro/`: scripts for an end-to-end baseline vs. CMAT experiment on X410 captures (synthetic dataset generation, real-capture test-set extraction, training, evaluation and a comparison notebook).
 
 2. Create a Conda environment and install the required packages:
 ```
@@ -40,12 +47,12 @@ conda env create --name t-prime --file ./conda-envs/TPrime_conda_env_training__n
 ```
 conda activate t-prime
 ```
-4. Integrating CMAT with T-PRIME
+4. Integrating CMAT with T-PRIME (only needed if you are **not** using the `hcro` branch)
 
-Several files from the original T-PRIME repository have been modified or replaced to enable CMAT. These updated files are provided in this repository in the `Measure-Once-Train-Often/TPRIME_implementation` directory. 
+Several files from the original T-PRIME repository have been modified or replaced to enable CMAT. These updated files are provided in this repository in the `Measure-Once-Train-Often/TPRIME_implementation` directory and are already applied on the `hcro` branch. 
 ### Files to copy from Measure-Once-Train-Often/TPRIME_implementation
 
-Copy the following updated files into your cloned T-PRIME repository, preserving the directory structure:
+To add CMAT to another T-PRIME checkout, copy the following updated files into it, preserving the directory structure:
 
 - Measure-Once-Train-Often/TPRIME_implementation/baseline_models/model_cnn1d.py  
 - Measure-Once-Train-Often/TPRIME_implementation/baseline_models/model_MCFormer.py  
@@ -67,6 +74,14 @@ cd Measure-Once-Train-Often
 - Expanded protocol/class options
 - Updated window generation logic
 - Made the number of classes configurable
+
+### Bug fix: CMAT channel application
+`apply_channel_via_fft` in `preprocessing/TPrime_dataset.py` originally kept the centre 1024 frequency bins starting at
+`(1201 - 1024) // 2 + 1`. That left DC at index 511 instead of 512, so after `ifftshift` every channel-augmented
+signal was shifted by -1 bin (-30 kHz at 30.72 MS/s). The shift is negligible for wideband classes, but it is as wide
+as the whole bandwidth of narrowband signals (e.g. ~60 kHz SSM), so a CMAT-trained model learned them at the wrong frequency.
+The start index is now `(1201 - 1024) // 2`; with a flat channel (H = 1) the output reproduces the input with no
+frequency shift. The fix is in `TPRIME_implementation/preprocessing/TPrime_dataset.py` and on the T-PRIME `hcro` branch.
 
 
 # Datasets
