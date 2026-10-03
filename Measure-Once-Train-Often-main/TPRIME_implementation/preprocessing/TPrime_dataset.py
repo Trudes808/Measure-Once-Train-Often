@@ -561,7 +561,9 @@ class TPrimeDataset(Dataset):
 
         Y_mid1201 = X_mid1201 / K
 
-        start1024 = (1201 - 1024) // 2 + 1
+        # DC sits at index 600 of the 1201-bin slice; starting at 88 puts it at index 512 so ifftshift maps it back
+        # to bin 0 (the original "+ 1" shifted every augmented signal by -1 bin = -30 kHz)
+        start1024 = (1201 - 1024) // 2
         end1024 = start1024 + 1024
         Y_mid1024 = Y_mid1201[start1024:end1024]
 
